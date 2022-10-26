@@ -11,6 +11,3 @@ type CalcResult struct {
 	Operation string `json:"operation"`
 	Result    int    `json:"result"`
 }
-type HistoryElement struct {
-	HistoryOfElements []CalcResult
-}

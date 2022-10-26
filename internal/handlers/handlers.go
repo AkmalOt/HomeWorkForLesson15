@@ -86,9 +86,13 @@ func Calculation(response http.ResponseWriter, request *http.Request) {
 	}
 }
 
-//const InfoFile = "Result.json"
-
 func GetHistory(response http.ResponseWriter, request *http.Request) {
+
+	method := request.Method
+	if method != http.MethodGet {
+		http.Error(response, "Method != Get", http.StatusBadRequest)
+		return
+	}
 
 	var History []models.CalcResult
 	file, err := os.OpenFile("./Result.json", os.O_RDWR, 0777)
@@ -118,11 +122,34 @@ func CleanHistory(response http.ResponseWriter, request *http.Request) {
 		log.Println(err)
 		return
 	}
-	_, err = file.Seek(0, io.SeekStart)
+
+	// этот метод перезаписивает наш файл Result.json
+	var history []models.CalcResult
+
+	contentJson, err := io.ReadAll(file)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	err = file.Truncate(0)
-	file.Close()
+	err = json.Unmarshal(contentJson, &history)
+
+	//log.Println(contentJson)
+
+	var bob []byte
+	if contentJson != nil {
+		err = os.WriteFile("Result.json", bob, 0777)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+	}
+
+	// Этот метод стирает текст изнутри нашей джсонки.
+	//_, err = file.Seek(0, io.SeekStart)
+	//if err != nil {
+	//	log.Println(err)
+	//	return
+	//}
+	//err = file.Truncate(0)
+	//file.Close()
 }
