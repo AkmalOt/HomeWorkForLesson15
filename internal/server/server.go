@@ -27,4 +27,5 @@ func (s *Server) Init() {
 	s.Mux.HandleFunc("/Calculate", handlers.Calculation)
 	s.Mux.HandleFunc("/Gethistory", handlers.GetHistory)
 	s.Mux.HandleFunc("/Cleanhistory", handlers.CleanHistory)
+
 }

@@ -2,12 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
-	"io"
 	"lesson15/internal/models"
+	"lesson15/internal/services"
 	"log"
 	"net/http"
-	"os"
-	"strconv"
 )
 
 func Calculation(response http.ResponseWriter, request *http.Request) {
@@ -17,27 +15,10 @@ func Calculation(response http.ResponseWriter, request *http.Request) {
 	SecondNum := quaries.Get("second_num")
 	Operation := quaries.Get("operation")
 
-	FirstNumInt, err := strconv.Atoi(FirstNum)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	SecondNumInt, err := strconv.Atoi(SecondNum)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	var ActionOfCulc int
-	switch {
-	case Operation == "+":
-		ActionOfCulc = FirstNumInt + SecondNumInt
-	case Operation == "-":
-		ActionOfCulc = FirstNumInt - SecondNumInt
-	case Operation == "*":
-		ActionOfCulc = FirstNumInt * SecondNumInt
-	case Operation == "/":
-		ActionOfCulc = FirstNumInt / SecondNumInt
-	}
+	FirstNumInt := services.StringToInt(FirstNum)
+	SecondNumInt := services.StringToInt(SecondNum)
+
+	ActionOfCulc := services.Calc(FirstNumInt, SecondNumInt, Operation)
 	config := models.CalcResult{
 		FirstNum:  FirstNumInt,
 		SecondNum: SecondNumInt,
@@ -56,34 +37,7 @@ func Calculation(response http.ResponseWriter, request *http.Request) {
 		log.Println(err)
 		return
 	}
-
-	file, err := os.OpenFile("./Result.json", os.O_RDWR, 0777)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	contentJson, err := io.ReadAll(file)
-	if err != nil {
-		log.Println(err)
-	}
-
-	var History []models.CalcResult
-	err = json.Unmarshal(contentJson, &History)
-	if err != nil {
-		log.Println(err)
-	}
-
-	History = append(History, config)
-
-	bytes, err := json.MarshalIndent(History, "", "  ")
-	if err != nil {
-		log.Println(err)
-	}
-
-	err = os.WriteFile("Result.json", bytes, 0777)
-	if err != nil {
-		log.Println(err)
-	}
+	services.WriteInJson(config)
 }
 
 func GetHistory(response http.ResponseWriter, request *http.Request) {
@@ -93,63 +47,10 @@ func GetHistory(response http.ResponseWriter, request *http.Request) {
 		http.Error(response, "Method != Get", http.StatusBadRequest)
 		return
 	}
+	services.RequestForHistory(response)
 
-	var History []models.CalcResult
-	file, err := os.OpenFile("./Result.json", os.O_RDWR, 0777)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	contentJson, err := io.ReadAll(file)
-	if err != nil {
-		log.Println(err)
-	}
-	err = json.Unmarshal(contentJson, &History)
-	if err != nil {
-		log.Println(err)
-	}
-
-	_, err = response.Write(contentJson)
-	if err != nil {
-		log.Println("Не получилось")
-		return
-	}
 }
 
 func CleanHistory(response http.ResponseWriter, request *http.Request) {
-	file, err := os.OpenFile("./Result.json", os.O_RDWR, 0777)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	// этот метод перезаписивает наш файл Result.json
-	var history []models.CalcResult
-
-	contentJson, err := io.ReadAll(file)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	err = json.Unmarshal(contentJson, &history)
-
-	//log.Println(contentJson)
-
-	var bob []byte
-	if contentJson != nil {
-		err = os.WriteFile("Result.json", bob, 0777)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-	}
-
-	// Этот метод стирает текст изнутри нашей джсонки.
-	//_, err = file.Seek(0, io.SeekStart)
-	//if err != nil {
-	//	log.Println(err)
-	//	return
-	//}
-	//err = file.Truncate(0)
-	//file.Close()
+	services.Clean()
 }

@@ -9,16 +9,17 @@ import (
 	"net/http"
 )
 
-type asd struct {
-}
-
-func (a asd) ServeHTTP(r http.ResponseWriter, req *http.Request) {
-
-}
-
 func main() {
+	err := execute()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+}
+
+func execute() error {
 	mux := http.NewServeMux()
-	asd := asd{}
+
 	service := services.NewService()
 
 	newServer := server.NewServer(mux, service)
@@ -27,14 +28,20 @@ func main() {
 	getConfig, err := config.GetConfig()
 	if err != nil {
 		log.Println("Ne poluchilos poluchit nastroyki")
-		return
+		return err
 	}
 
 	address := net.JoinHostPort(getConfig.Host, getConfig.Port)
-	log.Println(address)
-	err = http.ListenAndServe(address, asd)
+
+	srv := http.Server{
+		Addr:    address,
+		Handler: newServer,
+	}
+
+	err = srv.ListenAndServe()
 	if err != nil {
 		log.Println(err)
 	}
+	return nil
 
 }
