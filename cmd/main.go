@@ -2,6 +2,8 @@ package main
 
 import (
 	"lesson15/config"
+	"lesson15/internal/db"
+	"lesson15/internal/reprository"
 	"lesson15/internal/server"
 	"lesson15/internal/services"
 	"log"
@@ -20,9 +22,16 @@ func main() {
 func execute() error {
 	mux := http.NewServeMux()
 
-	service := services.NewService()
+	connection, err := db.GetDbConnection()
+	if err != nil {
+		return err
+	}
+	newReprository := reprository.NewReprository(connection)
+
+	service := services.NewService(newReprository)
 
 	newServer := server.NewServer(mux, service)
+
 	newServer.Init()
 
 	getConfig, err := config.GetConfig()

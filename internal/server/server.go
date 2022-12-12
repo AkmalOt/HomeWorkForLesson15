@@ -1,7 +1,6 @@
 package server
 
 import (
-	"lesson15/internal/handlers"
 	"lesson15/internal/services"
 	"net/http"
 )
@@ -24,8 +23,10 @@ func (s *Server) ServeHTTP(response http.ResponseWriter, request *http.Request) 
 
 func (s *Server) Init() {
 
-	s.Mux.HandleFunc("/Calculate", handlers.Calculation)
-	s.Mux.HandleFunc("/Gethistory", handlers.GetHistory)
-	s.Mux.HandleFunc("/Cleanhistory", handlers.CleanHistory)
+	s.Mux.HandleFunc("/Calculate", s.Calculation)
+	s.Mux.HandleFunc("/Gethistory", GetHistory)
+	s.Mux.HandleFunc("/Cleanhistory", CleanHistory)
+	s.Mux.HandleFunc("/clearlast", CleanLast)
+	s.Mux.HandleFunc("/pagination", s.Pagination)
 
 }

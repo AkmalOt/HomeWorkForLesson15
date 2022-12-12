@@ -6,8 +6,15 @@ type Config struct {
 }
 
 type CalcResult struct {
-	FirstNum  int    `json:"firstNum"`
-	SecondNum int    `json:"secondNum"`
-	Operation string `json:"operation"`
-	Result    int    `json:"result"`
+	FirstNum  int    `gorm:"first_num"`
+	SecondNum int    `gorm:"second_number"`
+	Operation string `gorm:"operation"`
+	Result    int    `gorm:"result"`
+}
+
+type Users struct {
+	Id    int    `json:"id"`
+	Name  string `json:"name"`
+	Age   int    `json:"age"`
+	Phone int    `json:"phone"`
 }
